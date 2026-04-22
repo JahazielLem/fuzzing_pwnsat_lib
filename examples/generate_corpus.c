@@ -26,7 +26,7 @@ int main(void) {
       // Write the payload based on the length field (remember length is data_len - 1)
       // HOST_TO_BE16 conversion implies we need to be careful with endianness on standard Macs, 
       // but assuming your packet structure is packed correctly:
-      uint16_t len = (packet.header.length >> 8) | (packet.header.length << 8); // Quick swap for BE to Host if needed, or use your getter
+      uint16_t len = (packet.header.length >> 8) | (packet.header.length << 8);
       fwrite(packet.data, 1, len + 1, f);
       fclose(f);
     }
