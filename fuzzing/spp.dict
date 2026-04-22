@@ -1,0 +1,23 @@
+# spp.dict - libFuzzer dictionary for Space Packet Protocol
+
+# CCSDS Version 0 (Bits 13-15 of Identification = 000)
+# TC Packet (Type = 1) -> 0x1000
+tc_ident="\x10\x00"
+# TM Packet (Type = 0) -> 0x0000
+tm_ident="\x00\x00"
+
+# Sequence Flags (Bits 14-15 of Sequence Control)
+# Unsegmented (11) -> 0xC000
+flag_unsegmented="\xc0\x00"
+# First segment (01) -> 0x4000
+flag_first_seg="\x40\x00"
+# Last segment (10) -> 0x8000
+flag_last_seg="\x80\x00"
+# Continuation segment (00) -> 0x0000
+flag_cont_seg="\x00\x00"
+
+# Secondary Header Present Flag (Bit 11 = 1) -> 0x0800
+sec_hdr_present="\x08\x00"
+
+# Idle APID (0x07FF)
+apid_idle="\x07\xff"

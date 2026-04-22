@@ -1,0 +1,73 @@
+cmake_minimum_required(VERSION 3.16)
+
+execute_process(
+    COMMAND git describe --tags --dirty --always
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    OUTPUT_VARIABLE GIT_VERSION
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
+string(REGEX REPLACE "^v" "" GIT_VERSION ${GIT_VERSION})
+
+string(REGEX MATCH "^[0-9]+\\.[0-9]+\\.[0-9]+" PROJECT_VERSION_CLEAN ${GIT_VERSION})
+
+if (NOT PROJECT_VERSION_CLEAN)
+    set(PROJECT_VERSION_CLEAN "0.0.0")
+endif()
+
+project(vulnccsds
+    VERSION ${PROJECT_VERSION_CLEAN}
+    DESCRIPTION "CCSDS Space Packet Protocol (SPP) Library"
+    LANGUAGES C
+)
+
+option(CCSDS_BUILD_EXAMPLES "Build examples" ON)
+option(CCSDS_INSTALL "Enable installation" ON)
+
+add_library(vulnccsds
+    src/spp/spp.c
+)
+
+add_library(vulnccsds::vulnccsds ALIAS vulnccsds)
+
+target_include_directories(vulnccsds
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/generated>
+        $<INSTALL_INTERFACE:include>
+)
+
+target_compile_features(vulnccsds PUBLIC c_std_99)
+
+if (CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
+    target_compile_options(vulnccsds PRIVATE -Wall -Wextra -Werror -Wpedantic)
+elseif (MSVC)
+    target_compile_options(vulnccsds PRIVATE /W4)
+endif()
+
+if (CCSDS_BUILD_EXAMPLES)
+    add_subdirectory(examples)
+endif()
+
+if (CCSDS_INSTALL)
+
+    include(GNUInstallDirs)
+
+    install(TARGETS vulnccsds
+            EXPORT ccsdsTargets
+            ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+            LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    )
+
+    install(DIRECTORY include/
+            DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    )
+
+    install(EXPORT ccsdsTargets
+            FILE ccsdsConfig.cmake
+            NAMESPACE vulnccsds::
+            DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/vulnccsds
+    )
+
+endif()
